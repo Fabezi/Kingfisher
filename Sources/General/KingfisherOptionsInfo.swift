@@ -99,6 +99,9 @@ public enum KingfisherOptionsInfoItem {
     /// prepare the image for using.
     case backgroundDecode
     
+    /// If set, Kingfisher will try to decode images found from cache in a background thread before using.
+    case backgroundDecodeFromCache
+
     /// The associated value of this member will be used as the target queue of dispatch callbacks when
     /// retrieving images from cache. If not set, Kingfisher will use main queue for callbacks.
     @available(*, deprecated, message: "Use `.callbackQueue(CallbackQueue)` instead.")
@@ -234,6 +237,7 @@ public struct KingfisherParsedOptionsInfo {
     public var waitForCache = false
     public var onlyFromCache = false
     public var backgroundDecode = false
+    public var backgroundDecodeFromCache = false
     public var preloadAllAnimationData = false
     public var callbackQueue: CallbackQueue = .mainCurrentOrAsync
     public var scaleFactor: CGFloat = 1.0
@@ -268,6 +272,7 @@ public struct KingfisherParsedOptionsInfo {
             case .waitForCache: waitForCache = true
             case .onlyFromCache: onlyFromCache = true
             case .backgroundDecode: backgroundDecode = true
+            case .backgroundDecodeFromCache: backgroundDecodeFromCache = true
             case .preloadAllAnimationData: preloadAllAnimationData = true
             case .callbackQueue(let value): callbackQueue = value
             case .scaleFactor(let value): scaleFactor = value

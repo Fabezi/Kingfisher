@@ -322,15 +322,26 @@ public class KingfisherManager {
         if validCache {
             targetCache.retrieveImage(forKey: key, options: options) { result in
                 guard let completionHandler = completionHandler else { return }
-                options.callbackQueue.execute {
-                    if let image = result.value?.image {
-                        let value = result.map {
-                            RetrieveImageResult(image: image, cacheType: $0.cacheType, source: source)
+                
+                /// Check we have an image and whether we should background decode cached images.
+                switch (result.value?.image, options.backgroundDecodeFromCache) {
+                case let (.some(image), decode) where decode == true:
+                    (options.processingQueue ?? self.processingQueue).execute {
+                        let decoded = image.kf.decoded
+                        options.callbackQueue.execute {
+                            completionHandler(result.map({
+                                RetrieveImageResult(image: decoded, cacheType: $0.cacheType, source: source)
+                            }))
                         }
-                        completionHandler(value)
-                    } else {
-                        completionHandler(.failure(KingfisherError.cacheError(reason: .imageNotExisting(key: key))))
                     }
+                case let (.some(image), _): /// Default behavior. Route to callback.
+                    options.callbackQueue.execute {
+                        completionHandler(result.map({
+                            RetrieveImageResult(image: image, cacheType: $0.cacheType, source: source)
+                        }))
+                    }
+                default: /// No image found. Return failure.
+                    completionHandler(.failure(KingfisherError.cacheError(reason: .imageNotExisting(key: key))))
                 }
             }
             return true
